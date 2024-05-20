@@ -1,13 +1,16 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS, cross_origin
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 
 app = Flask(__name__)
-CORS(app)  # Добавление CORS к вашему приложению
+# CORS(app)  # Добавление CORS к вашему приложению
+CORS(app, resources={r"/*": {"origins": "*"}})
 
-app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://sfeduadmin_user:password123@5.182.87.23/graph_db'
+app.config['JWT_SECRET_KEY'] = 'your_jwt_secret_key'
 db = SQLAlchemy(app)
+jwt = JWTManager(app)
 
 class Graphs(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -36,6 +39,22 @@ class Users(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(255), unique=True)
     password = db.Column(db.String(255))
+    role_id = db.Column(db.Integer)
+
+
+# Auth
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.json
+    user = Users.query.filter_by(username=data['username']).first()
+    if user and user.password == data['password'] and user.role_id == 1:
+        access_token = create_access_token(identity={'username': user.username, 'role_id': user.role_id})
+        response = jsonify(access_token=access_token)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    response = jsonify({'message': 'Invalid credentials'})
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response, 401
 
 # GET all graphs
 @app.route('/graphs', methods=['GET'])

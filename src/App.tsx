@@ -6,12 +6,13 @@ import {
   ShowGuesser,
 } from "react-admin";
 import dataProvider from "./dataProvider";
+import authProvider from "./authProvider";
 import { GraphsList, GraphsEdit, GraphsCreate } from "./Graph";
 import { UsersList, UsersEdit, UsersCreate } from "./Users";
 import { NodesCreate, NodesEdit, NodesList } from "./Nodes";
 import { EdgesCreate, EdgesEdit, EdgesList } from "./Edges";
 
-export const App = () => <Admin dataProvider={dataProvider}>
+export const App = () => <Admin dataProvider={dataProvider} authProvider={authProvider}>
   <Resource name="graphs" list={GraphsList} edit={GraphsEdit} create={GraphsCreate} />
   <Resource name="users" list={UsersList} edit={UsersEdit} create={UsersCreate} />
   <Resource name="nodes" list={NodesList} edit={NodesEdit} create={NodesCreate} />
